@@ -17,32 +17,31 @@ features$Name<-sapply(features$V2,FUN=ProcessNames)
 
 ###Read activity labels
 activitylab<-read.table("C:/Users/aemmert/Documents/Rstuff/getdata/UCI HAR Dataset/activity_labels.txt")
-colnames(activitylab)<-c("ID", "Activity")
-trainsub<-read.table("C:/Users/aemmert/Documents/Rstuff/getdata/UCI HAR Dataset/train/subject_train.txt")
-colnames(trainsub)[1]<-"ID"
-trainsub<-merge(trainsub,activitylab,by="ID",all.x=T)
-dim(trainsub)
-testsub<-read.table("C:/Users/aemmert/Documents/Rstuff/getdata/UCI HAR Dataset/test/subject_test.txt")
-colnames(testsub)[1]<-"ID"
-testsub<-merge(testsub,activitylab,by="ID",all.x=T)
-testsub[1,]
-
+colnames(activitylab)<-c("ActivityID", "Activity")
 
 ###Read train data and set column names
 train<-read.table("C:/Users/aemmert/Documents/Rstuff/getdata/UCI HAR Dataset/train/X_train.txt")
-train[1,]
 colnames(train)<-features$Name
-train$Label<-"train"
-train<-cbind(trainsub,train)
+trainy<-read.table("C:/Users/aemmert/Documents/Rstuff/getdata/UCI HAR Dataset/train/Y_train.txt")
+colnames(trainy)<-"ActivityID"
+trainid<-read.table("C:/Users/aemmert/Documents/Rstuff/getdata/UCI HAR Dataset/train/subject_train.txt")
+colnames(trainid)[1]<-"ID"
+train<-cbind(trainid,trainy,train)
+train<-merge(train,activitylab,by="ActivityID",all.x=T,all.y=F,sort=F)
+dim(train)
 train[1,]
 
 
 ###Read test data and set column names
 test<-read.table("C:/Users/aemmert/Documents/Rstuff/getdata/UCI HAR Dataset/test/X_test.txt")
-test[1,]
 colnames(test)<-features$Name
-test$Label<-"test"
-test<-cbind(testsub,test)
+testy<-read.table("C:/Users/aemmert/Documents/Rstuff/getdata/UCI HAR Dataset/test/Y_test.txt")
+colnames(testy)<-"ActivityID"
+testid<-read.table("C:/Users/aemmert/Documents/Rstuff/getdata/UCI HAR Dataset/test/subject_test.txt")
+colnames(testid)[1]<-"ID"
+test<-cbind(testid,testy,test)
+test<-merge(test,activitylab,by="ActivityID",all.x=T,all.y=F,sort=F)
+dim(test)
 test[1,]
 
 
@@ -51,13 +50,14 @@ combined<-rbind(train,test)
 combined[1,]
 
 ###Remove columns without mean and std in the name, write file
-keepcols<-c(1:2,grep("mean", colnames(combined)), grep("std", colnames(combined)))
+keepcols<-c(2,564,grep("mean", colnames(combined)), grep("std", colnames(combined)))
 subcombined<-combined[,keepcols]
+str(subcombined)
 write.csv(subcombined,file="subcombined.csv",row.names=F)
 
 ###Calculate mean for the columns and output in a matrix
-summarycombined<-apply(subcombined[3:ncol(subcombined)],2,FUN=mean)
-summarycombined<-data.frame(cbind(VariableName=names(summarycombined),Mean=as.vector(summarycombined)))
-write.table(summarycombined,file="summarycombined.txt",row.names = F)
-
-
+Index<-paste(subcombined$ID,subcombined$Activity,sep="_")
+summarycombined<-apply(subcombined[3:ncol(subcombined)], 2, FUN=function(x) tapply(x,Index,FUN=mean))
+summarycombined<-lapply(subcombined[3:ncol(subcombined)], FUN=function(x) tapply(x,Index,FUN=mean))
+a<-as.data.frame(summarycombined)
+write.table(summarycombined,file="summarycombined.txt",row.names = T)
