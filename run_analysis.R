@@ -1,10 +1,10 @@
 
 
-###Set working directory
-setwd("C:/Users/aemmert/Documents/Rstuff/getdata/UCI HAR Dataset")
+###See working directory
+getwd()
 
 ###Read and initialize features
-features<-read.table("C:/Users/aemmert/Documents/Rstuff/getdata/UCI HAR Dataset/features.txt")
+features<-read.table("./UCI HAR Dataset/features.txt")
 features[1:100,]
 ProcessNames<-function(InputString){
   WorkingString<-InputString
@@ -16,15 +16,15 @@ ProcessNames<-function(InputString){
 features$Name<-sapply(features$V2,FUN=ProcessNames)
 
 ###Read activity labels
-activitylab<-read.table("C:/Users/aemmert/Documents/Rstuff/getdata/UCI HAR Dataset/activity_labels.txt")
+activitylab<-read.table("./UCI HAR Dataset/activity_labels.txt")
 colnames(activitylab)<-c("ActivityID", "Activity")
 
 ###Read train data and set column names
-train<-read.table("C:/Users/aemmert/Documents/Rstuff/getdata/UCI HAR Dataset/train/X_train.txt")
+train<-read.table("./UCI HAR Dataset/train/X_train.txt")
 colnames(train)<-features$Name
-trainy<-read.table("C:/Users/aemmert/Documents/Rstuff/getdata/UCI HAR Dataset/train/Y_train.txt")
+trainy<-read.table("./UCI HAR Dataset/train/Y_train.txt")
 colnames(trainy)<-"ActivityID"
-trainid<-read.table("C:/Users/aemmert/Documents/Rstuff/getdata/UCI HAR Dataset/train/subject_train.txt")
+trainid<-read.table("./UCI HAR Dataset/train/subject_train.txt")
 colnames(trainid)[1]<-"ID"
 train<-cbind(trainid,trainy,train)
 train<-merge(train,activitylab,by="ActivityID",all.x=T,all.y=F,sort=F)
@@ -33,11 +33,11 @@ train[1,]
 
 
 ###Read test data and set column names
-test<-read.table("C:/Users/aemmert/Documents/Rstuff/getdata/UCI HAR Dataset/test/X_test.txt")
+test<-read.table("./UCI HAR Dataset/test/X_test.txt")
 colnames(test)<-features$Name
-testy<-read.table("C:/Users/aemmert/Documents/Rstuff/getdata/UCI HAR Dataset/test/Y_test.txt")
+testy<-read.table("./UCI HAR Dataset/test/Y_test.txt")
 colnames(testy)<-"ActivityID"
-testid<-read.table("C:/Users/aemmert/Documents/Rstuff/getdata/UCI HAR Dataset/test/subject_test.txt")
+testid<-read.table("./UCI HAR Dataset/test/subject_test.txt")
 colnames(testid)[1]<-"ID"
 test<-cbind(testid,testy,test)
 test<-merge(test,activitylab,by="ActivityID",all.x=T,all.y=F,sort=F)
